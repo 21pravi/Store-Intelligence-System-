@@ -3,7 +3,7 @@
 Turn raw store CCTV into business intelligence — **footfall, conversion funnel,
 dwell/engagement, and anomalies** — served via a JSON API and a live dashboard.
 
-Built for **Purplle, Brigade Road, Bangalore** (`ST1008`) from 5 camera feeds +
+Built for **Purplle** (`ST1008`) from 5 camera feeds +
 the day's POS export + the floor plan.
 
 > Headline on the supplied footage: **4 in / 4 out** at the door over a ~3-min
