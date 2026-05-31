@@ -1,0 +1,19 @@
+services:
+  store-intel:
+    build: .
+    image: store-intelligence:1.0
+    container_name: store-intel
+    ports:
+      - "8000:8000"
+    environment:
+      # backend: auto | yolo | motion. 'auto' uses YOLO if weights are present,
+      # else falls back to the dependency-free motion backend.
+      DETECTOR_BACKEND: auto
+      # Set to 1 to (re)process the mounted footage on startup.
+      FORCE_INGEST: "0"
+    volumes:
+      # Drop CAM_*.mp4 here to ingest your own footage (then FORCE_INGEST=1).
+      - ./videos:/app/videos:ro
+      # Persist the event store + POS outside the container.
+      - ./data:/app/data
+    restart: unless-stopped
