@@ -1,0 +1,20 @@
+Ready-to-push: GitHub Pages live dashboard
+==========================================
+
+Contents:
+  docs/index.html   -> new file: the hosted dashboard (real data embedded, no server)
+  README.md         -> replaces your current README.md (adds the live-demo link at the top)
+
+Steps (run in your local clone of the repo):
+  1. Copy docs/index.html and README.md from this package into your repo root,
+     keeping the folder layout (docs/ stays a folder).
+  2. git add docs/index.html README.md
+     git commit -m "Add GitHub Pages dashboard preview + demo link"
+     git push
+  3. On GitHub: Settings -> Pages -> Source: Deploy from a branch
+     -> Branch: main / folder: /docs -> Save
+  4. After ~1 min your live dashboard is at:
+     https://21pravi.github.io/Store-Intelligence-System-/
+
+Note: the Pages demo is a static snapshot of real computed numbers (they don't
+refresh). For the live API-polling version, run `docker compose up` -> localhost:8000.
