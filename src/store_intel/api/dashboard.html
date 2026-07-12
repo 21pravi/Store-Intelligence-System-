@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Store Intelligence · Purplle Brigade Road</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Schibsted+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a0f; --bg2:#101019; --panel:#13131e; --panel2:#181826;
+    --line:#262636; --ink:#ece9f5; --ink-dim:#8a87a0; --ink-faint:#56546b;
+    --accent:#a855f7;          /* purplle violet */
+    --accent-2:#7c3aed;
+    --green:#34d399; --amber:#fbbf24; --red:#fb5e6d; --cyan:#38e1d6;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --disp:'Syne',system-ui,sans-serif;
+    --body:'Schibsted Grotesk',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:
+      radial-gradient(900px 500px at 88% -8%,rgba(168,85,247,.10),transparent 60%),
+      radial-gradient(700px 500px at -5% 110%,rgba(56,225,214,.06),transparent 55%),
+      var(--bg);
+    color:var(--ink);font-family:var(--body);
+    background-attachment:fixed;
+  }
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.35;
+    background-image:linear-gradient(var(--line) 1px,transparent 1px),
+       linear-gradient(90deg,var(--line) 1px,transparent 1px);
+    background-size:46px 46px;mask:radial-gradient(circle at 50% 0,#000,transparent 80%);}
+  .wrap{max-width:1320px;margin:0 auto;padding:22px 22px 60px}
+  header{display:flex;align-items:flex-end;justify-content:space-between;
+    gap:20px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:18px}
+  .brand{display:flex;flex-direction:column;gap:4px}
+  .brand .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.32em;
+    text-transform:uppercase;color:var(--accent)}
+  h1{font-family:var(--disp);font-weight:800;font-size:30px;margin:0;letter-spacing:-.01em}
+  h1 span{color:var(--ink-dim);font-weight:600}
+  .status{display:flex;gap:14px;align-items:center;flex-wrap:wrap;font-family:var(--mono);font-size:12px}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--green);
+    box-shadow:0 0 0 0 rgba(52,211,153,.6);animation:pulse 2s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(52,211,153,.5)}70%{box-shadow:0 0 0 9px rgba(52,211,153,0)}100%{box-shadow:0 0 0 0 rgba(52,211,153,0)}}
+  .badge{border:1px solid var(--line);padding:5px 10px;border-radius:999px;color:var(--ink-dim)}
+  .badge b{color:var(--ink)}
+  /* hero KPIs */
+  .hero{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr 1fr;gap:14px;margin:20px 0}
+  .kpi{background:linear-gradient(180deg,var(--panel),var(--panel2));
+    border:1px solid var(--line);border-radius:16px;padding:16px 18px;position:relative;overflow:hidden}
+  .kpi .lab{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--ink-dim)}
+  .kpi .val{font-family:var(--disp);font-weight:800;font-size:34px;margin-top:8px;line-height:1}
+  .kpi .sub{font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin-top:7px}
+  .kpi.feat{grid-row:span 1}
+  .kpi.feat .val{font-size:46px;background:linear-gradient(90deg,#fff,var(--accent));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .kpi .spark{position:absolute;right:10px;bottom:8px;opacity:.7}
+  .tagest{display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:.1em;
+    color:var(--amber);border:1px solid rgba(251,191,36,.4);border-radius:4px;padding:1px 5px;margin-left:6px;vertical-align:middle}
+  /* grid */
+  .grid{display:grid;grid-template-columns:1.25fr 1fr;gap:14px}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px}
+  .panel h2{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--ink-dim);margin:0 0 16px;display:flex;justify-content:space-between;align-items:center}
+  .panel h2 .hint{color:var(--ink-faint);letter-spacing:.05em;text-transform:none;font-weight:400}
+  /* funnel */
+  .fstage{margin-bottom:14px}
+  .fstage .top{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;margin-bottom:6px}
+  .fstage .top .n{color:var(--ink);font-weight:700}
+  .bar{height:30px;border-radius:8px;background:linear-gradient(90deg,var(--accent-2),var(--accent));
+    position:relative;transition:width .8s cubic-bezier(.2,.8,.2,1);min-width:2px;
+    display:flex;align-items:center;padding-left:10px;font-family:var(--mono);font-size:12px;font-weight:700}
+  .bar.dim{background:linear-gradient(90deg,#2a2a3d,#34344a)}
+  .drop{font-family:var(--mono);font-size:10.5px;color:var(--red);text-align:right;margin-top:3px}
+  .drop.ok{color:var(--ink-faint)}
+  /* charts */
+  canvas{display:block;width:100%}
+  .chartwrap{position:relative}
+  .axis{font-family:var(--mono);font-size:9.5px;color:var(--ink-faint)}
+  /* zones */
+  .zones{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .zone{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--bg2)}
+  .zone .zn{font-family:var(--mono);font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.1em}
+  .zone .zv{font-family:var(--disp);font-weight:800;font-size:26px;margin:6px 0 2px}
+  .zone .zs{font-family:var(--mono);font-size:10px;color:var(--ink-faint)}
+  .heat{margin-top:10px;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+  /* anomalies */
+  .anom{display:flex;gap:11px;padding:11px 0;border-bottom:1px solid var(--line);align-items:flex-start}
+  .anom:last-child{border-bottom:none}
+  .sev{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.1em;padding:3px 7px;border-radius:5px;text-transform:uppercase;flex-shrink:0;margin-top:1px}
+  .sev.warning{background:rgba(251,191,36,.14);color:var(--amber);border:1px solid rgba(251,191,36,.35)}
+  .sev.critical{background:rgba(251,94,109,.14);color:var(--red);border:1px solid rgba(251,94,109,.4)}
+  .sev.info{background:rgba(56,225,214,.12);color:var(--cyan);border:1px solid rgba(56,225,214,.3)}
+  .anom .msg{font-size:13px;line-height:1.4}
+  .anom .ev{font-family:var(--mono);font-size:10px;color:var(--ink-faint);margin-top:2px}
+  .empty{color:var(--ink-faint);font-family:var(--mono);font-size:12px;padding:14px 0}
+  /* events table */
+  table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11.5px}
+  th{text-align:left;color:var(--ink-faint);font-weight:500;padding:7px 8px;border-bottom:1px solid var(--line);
+    text-transform:uppercase;letter-spacing:.08em;font-size:10px}
+  td{padding:7px 8px;border-bottom:1px solid rgba(38,38,54,.5);color:var(--ink-dim)}
+  td .pill{padding:2px 7px;border-radius:5px;font-size:10px;color:var(--ink)}
+  .et-entry{background:rgba(52,211,153,.18)} .et-exit{background:rgba(251,94,109,.16)}
+  .et-zone_presence{background:rgba(168,85,247,.16)} .et-checkout_presence{background:rgba(56,225,214,.14)}
+  .et-staff_presence{background:rgba(120,120,150,.18)}
+  .cams{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+  .cam{border:1px solid var(--line);border-radius:10px;padding:8px 11px;font-family:var(--mono);font-size:11px;background:var(--bg2)}
+  .cam b{color:var(--ink)} .cam .r{color:var(--accent)}
+  .full{grid-column:1/-1}
+  .foot{margin-top:26px;font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);text-align:center;line-height:1.7}
+  .btn{font-family:var(--mono);font-size:11px;background:var(--panel2);color:var(--ink);
+    border:1px solid var(--line);border-radius:8px;padding:6px 11px;cursor:pointer}
+  .btn:hover{border-color:var(--accent)}
+  @media(max-width:980px){.hero{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.zones{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="eyebrow">Store Intelligence · Live</div>
+      <h1 id="storeName">Purplle <span>Brigade Road</span></h1>
+    </div>
+    <div class="status">
+      <span><span class="dot"></span> &nbsp;OPERATIONAL</span>
+      <span class="badge">backend&nbsp;<b id="backend">—</b></span>
+      <span class="badge">events&nbsp;<b id="evCount">—</b></span>
+      <span class="badge">window&nbsp;<b id="window">—</b></span>
+      <button class="btn" id="refreshBtn">⟳ refresh</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="kpi feat">
+      <div class="lab">Projected conversion <span class="tagest">EST</span></div>
+      <div class="val" id="convVal">—</div>
+      <div class="sub" id="convSub">day footfall vs billed transactions</div>
+    </div>
+    <div class="kpi">
+      <div class="lab">Footfall · in</div>
+      <div class="val" id="entries">—</div>
+      <div class="sub" id="entriesSub">across observed window</div>
+    </div>
+    <div class="kpi">
+      <div class="lab">Footfall · out</div>
+      <div class="val" id="exits">—</div>
+      <div class="sub" id="occSub">net occupancy —</div>
+    </div>
+    <div class="kpi">
+      <div class="lab">Avg browse dwell</div>
+      <div class="val" id="dwell">—</div>
+      <div class="sub" id="dwellSub">median —</div>
+    </div>
+    <div class="kpi">
+      <div class="lab">Day footfall <span class="tagest">EST</span></div>
+      <div class="val" id="dayFoot">—</div>
+      <div class="sub" id="dayFootSub">@ — entries/min</div>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div class="panel">
+      <h2>Conversion funnel <span class="hint">distinct visitors → purchase</span></h2>
+      <div id="funnel"></div>
+    </div>
+    <div class="panel">
+      <h2>Footfall pulse <span class="hint">entries / 30s</span></h2>
+      <div class="chartwrap"><canvas id="footChart" height="150"></canvas></div>
+      <h2 style="margin-top:18px">Checkout queue <span class="hint">people at till</span></h2>
+      <div class="chartwrap"><canvas id="queueChart" height="110"></canvas></div>
+    </div>
+  </section>
+
+  <section class="grid" style="margin-top:14px">
+    <div class="panel">
+      <h2>Zone engagement <span class="hint">unique visitors · presence heatmap</span></h2>
+      <div class="zones" id="zones"></div>
+    </div>
+    <div class="panel">
+      <h2>Anomaly feed <span class="hint">rule-based · explainable</span></h2>
+      <div id="anoms"></div>
+    </div>
+  </section>
+
+  <section class="panel full" style="margin-top:14px">
+    <h2>Camera network</h2>
+    <div class="cams" id="cams"></div>
+  </section>
+
+  <section class="panel full" style="margin-top:14px">
+    <h2>Event stream <span class="hint">latest structured events</span></h2>
+    <div style="overflow:auto"><table id="evTable">
+      <thead><tr><th>time</th><th>camera</th><th>zone</th><th>type</th><th>track</th><th>class</th><th>dwell</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+  </section>
+
+  <div class="foot">
+    Anonymous person-tracking only · no biometric identification · ephemeral per-camera track IDs<br/>
+    Day-level figures tagged <span style="color:var(--amber)">EST</span> are projections from the measured clip rate, not measurements.
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const fmt = n => (n==null?'—':(''+n));
+const hhmm = iso => { try{const d=new Date(iso);return d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}catch(e){return iso;} };
+
+async function getJSON(u){ const r=await fetch(u); if(!r.ok) throw new Error(u+' '+r.status); return r.json(); }
+
+function drawBars(canvas, data, color){
+  const dpr=window.devicePixelRatio||1, w=canvas.clientWidth, h=canvas.height;
+  canvas.width=w*dpr; canvas.height=h*dpr; const c=canvas.getContext('2d'); c.scale(dpr,dpr);
+  c.clearRect(0,0,w,h);
+  if(!data.length){c.fillStyle='#56546b';c.font="11px JetBrains Mono";c.fillText('no data',8,20);return;}
+  const max=Math.max(1,...data.map(d=>d.v)); const bw=w/data.length;
+  data.forEach((d,i)=>{
+    const bh=(d.v/max)*(h-22); const x=i*bw+2; const y=h-18-bh;
+    const g=c.createLinearGradient(0,y,0,h-18); g.addColorStop(0,color); g.addColorStop(1,'rgba(168,85,247,.15)');
+    c.fillStyle=g; c.fillRect(x,y,Math.max(1,bw-4),bh);
+    if(d.v>0){c.fillStyle='#ece9f5';c.font="9px JetBrains Mono";c.textAlign='center';c.fillText(d.v,x+(bw-4)/2,y-3);}
+  });
+  c.fillStyle='#56546b';c.font="9px JetBrains Mono";c.textAlign='left';
+  if(data[0])c.fillText(data[0].t,2,h-5);
+  c.textAlign='right'; if(data[data.length-1])c.fillText(data[data.length-1].t,w-2,h-5);
+}
+function drawLine(canvas, data, color){
+  const dpr=window.devicePixelRatio||1, w=canvas.clientWidth, h=canvas.height;
+  canvas.width=w*dpr; canvas.height=h*dpr; const c=canvas.getContext('2d'); c.scale(dpr,dpr);
+  c.clearRect(0,0,w,h);
+  if(!data.length){c.fillStyle='#56546b';c.font="11px JetBrains Mono";c.fillText('no queue activity',8,20);return;}
+  const max=Math.max(1,...data.map(d=>d.v)); const step=w/Math.max(1,data.length-1);
+  c.beginPath();
+  data.forEach((d,i)=>{const x=i*step;const y=h-16-(d.v/max)*(h-26); i?c.lineTo(x,y):c.moveTo(x,y);});
+  c.strokeStyle=color;c.lineWidth=2;c.stroke();
+  c.lineTo((data.length-1)*step,h-16);c.lineTo(0,h-16);c.closePath();
+  c.fillStyle='rgba(56,225,214,.10)';c.fill();
+  c.fillStyle='#56546b';c.font="9px JetBrains Mono";c.fillText('peak '+max,4,12);
+}
+function drawHeat(canvas, mat){
+  if(!mat){return;}
+  const rows=mat.length, cols=mat[0].length, cell=Math.max(3,Math.floor(220/cols));
+  canvas.width=cols*cell; canvas.height=rows*cell; canvas.style.width='100%'; canvas.style.height='auto';
+  const c=canvas.getContext('2d');
+  for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){
+    const v=mat[y][x]; if(v<=0){continue;}
+    const a=Math.min(1,Math.pow(v,0.45));
+    const r=Math.round(40+a*215), g=Math.round(20+a*60), b=Math.round(80+a*175);
+    c.fillStyle=`rgba(${r},${g},${b},${0.15+a*0.85})`;
+    c.fillRect(x*cell,y*cell,cell,cell);
+  }
+}
+
+async function load(){
+  try{
+    const [h,m,f,a,cams,ev] = await Promise.all([
+      getJSON('/health'), getJSON('/metrics'), getJSON('/funnel'),
+      getJSON('/anomalies'), getJSON('/cameras'), getJSON('/events?limit=40')
+    ]);
+    $('#storeName').innerHTML = h.store.replace('_',' ')+' <span>Brigade Road</span>';
+    $('#backend').textContent=h.detector_backend||'—';
+    $('#evCount').textContent=h.events;
+    $('#window').textContent=hhmm(m.window.start)+'–'+hhmm(m.window.end);
+
+    // hero
+    const proj=m.day_projection;
+    $('#convVal').textContent=(proj.projected_day_conversion_pct!=null?proj.projected_day_conversion_pct+'%':'—');
+    $('#convSub').textContent=`${proj.day_transactions} billed · ${proj.projected_day_footfall} est. footfall`;
+    $('#entries').textContent=m.footfall.entries;
+    $('#exits').textContent=m.footfall.exits;
+    $('#occSub').textContent='net occupancy '+(m.footfall.net_occupancy_change>=0?'+':'')+m.footfall.net_occupancy_change;
+    $('#dwell').textContent=m.engagement.browse_dwell.mean_s+'s';
+    $('#dwellSub').textContent='median '+m.engagement.browse_dwell.median_s+'s · max '+m.engagement.browse_dwell.max_s+'s';
+    $('#dayFoot').textContent=proj.projected_day_footfall??'—';
+    $('#dayFootSub').textContent='@ '+proj.rate_per_min+' entries/min';
+
+    // funnel
+    const fc=$('#funnel'); fc.innerHTML='';
+    const maxv=Math.max(1,...f.stages.map(s=>s.value));
+    f.stages.forEach((s,i)=>{
+      const div=document.createElement('div');div.className='fstage';
+      const pct=(s.value/maxv*100).toFixed(0);
+      const dropKey=i>0?(f.stages[i-1].key+'->'+s.key):null;
+      const drop=dropKey&&f.drop_off_pct?f.drop_off_pct[dropKey]:null;
+      div.innerHTML=`<div class="top"><span>${s.label}</span><span class="n">${s.value}${s.observed!==s.value?` <span style="color:var(--ink-faint)">(obs ${s.observed})</span>`:''}</span></div>
+        <div class="bar ${i===f.stages.length-1?'':''}" style="width:${Math.max(6,pct)}%">${s.value}</div>
+        ${drop!=null?`<div class="drop ${drop<=0?'ok':''}">▼ ${drop}% drop-off</div>`:''}`;
+      fc.appendChild(div);
+    });
+
+    // charts
+    drawBars($('#footChart'), m.timeseries.footfall.map(d=>({t:hhmm(d.t),v:d.entries})), '#a855f7');
+    drawLine($('#queueChart'), m.timeseries.checkout_queue.map(d=>({t:hhmm(d.t),v:d.queue})), '#38e1d6');
+
+    // zones
+    const zc=$('#zones'); zc.innerHTML='';
+    const zv=m.engagement.zone_unique_visitors;
+    const camMap=Object.fromEntries(cams.cameras.map(c=>[c.zone,c]));
+    Object.entries(zv).forEach(([zone,vis])=>{
+      const cam=cams.cameras.find(c=>c.zones.some(z=>z.name===zone))||camMap[zone];
+      const div=document.createElement('div');div.className='zone';
+      div.innerHTML=`<div class="zn">${zone.replace(/_/g,' ')}</div><div class="zv">${vis}</div>
+        <div class="zs">unique visitors${cam?' · '+cam.id:''}</div>
+        <canvas class="heat"></canvas>`;
+      zc.appendChild(div);
+      if(cam&&cam.heatmap) drawHeat(div.querySelector('canvas'),cam.heatmap);
+    });
+
+    // anomalies
+    const ac=$('#anoms'); ac.innerHTML='';
+    if(!a.anomalies.length){ac.innerHTML='<div class="empty">No anomalies in this window — store operating normally.</div>';}
+    a.anomalies.forEach(x=>{
+      const div=document.createElement('div');div.className='anom';
+      div.innerHTML=`<span class="sev ${x.severity}">${x.severity}</span>
+        <div><div class="msg">${x.message}</div><div class="ev">${Object.entries(x.evidence).map(([k,v])=>k+'='+v).join(' · ')}</div></div>`;
+      ac.appendChild(div);
+    });
+
+    // cameras
+    const cc=$('#cams'); cc.innerHTML='';
+    cams.cameras.forEach(c=>{
+      const div=document.createElement('div');div.className='cam';
+      div.innerHTML=`<b>${c.id}</b> · <span class="r">${c.role}</span><br/><span style="color:var(--ink-faint)">${c.zone}${c.has_tripwire?' · tripwire':''}</span>`;
+      cc.appendChild(div);
+    });
+
+    // events
+    const tb=$('#evTable tbody'); tb.innerHTML='';
+    ev.events.slice().reverse().forEach(e=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td>${hhmm(e.ts)}</td><td>${e.camera_id}</td><td>${e.zone}</td>
+        <td><span class="pill et-${e.event_type}">${e.event_type}</span></td>
+        <td>${e.track_id}</td><td>${e.person_class}</td><td>${e.dwell_s?e.dwell_s+'s':'—'}</td>`;
+      tb.appendChild(tr);
+    });
+  }catch(err){ console.error(err); }
+}
+$('#refreshBtn').addEventListener('click',load);
+window.addEventListener('resize',()=>load());
+load();
+setInterval(load, 8000);   // live polling
+</script>
+</body>
+</html>

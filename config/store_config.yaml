@@ -1,0 +1,129 @@
+# =============================================================================
+# Store Intelligence — Store Configuration
+# Purplle Brigade Road, Bangalore (store_id ST1008)
+#
+# All zone/tripwire coordinates are NORMALISED (0..1) on the camera frame so the
+# config is resolution-independent. (0,0) = top-left, (1,1) = bottom-right.
+# Camera start_time values are the wall-clock at frame 0, read from the on-screen
+# display (OSD) burned into each clip. In production these come from the NTP-synced
+# RTSP stream timestamp instead — see CHOICES.md.
+# =============================================================================
+
+store:
+  store_id: ST1008
+  name: Brigade_Bangalore
+  city: Bangalore
+  timezone: Asia/Kolkata
+  # Trading hours used by anomaly rules (after-hours movement) and day projection.
+  open_time: "11:00:00"
+  close_time: "22:00:00"
+  # Known on-shift staff. The POS file lists 5 distinct salespersons for the day;
+  # we keep a small buffer for floor staff/managers not tied to a till.
+  expected_staff: 6
+
+# Detection backend: "auto" tries YOLO, falls back to motion if weights are absent.
+detector:
+  backend: auto            # auto | yolo | motion
+  yolo_model: yolov8n.pt   # nano: fastest, good enough for footfall on CPU
+  conf: 0.30
+  # Processing throttle — we do not need 30 fps to count people through a door.
+  target_fps: 5
+  proc_width: 640          # downscale long edge for inference speed
+  # A zone presence must persist at least this many sampled frames to count as a
+  # real visitor (filters 1-2 frame background-subtraction noise blobs).
+  min_presence_frames: 4
+
+cameras:
+  - id: CAM_1
+    file: CAM_1.mp4
+    role: browse                 # left aisle — skincare wall (Face Shop, DermaCo, Minimalist...)
+    zone: skincare_aisle
+    start_time: "2026-04-10T20:10:27"
+    # Whole frame is a browse zone; presence + dwell measured here.
+    zones:
+      - name: skincare_aisle
+        type: browse
+        polygon: [[0.02, 0.05], [0.98, 0.05], [0.98, 0.98], [0.02, 0.98]]
+
+  - id: CAM_2
+    file: CAM_2.mp4
+    role: browse                 # right aisle — makeup wall (Lakme, Faces Canada, Maybelline...)
+    zone: makeup_aisle
+    start_time: "2026-04-10T20:10:02"
+    zones:
+      - name: makeup_aisle
+        type: browse
+        polygon: [[0.02, 0.05], [0.98, 0.05], [0.98, 0.98], [0.02, 0.98]]
+
+  - id: CAM_3
+    file: CAM_3.mp4
+    role: entrance               # door / threshold — THE footfall counter
+    zone: entrance
+    start_time: "2026-04-10T20:09:50"
+    # Virtual tripwire across the doorway. Store interior is to the LEFT (low x),
+    # the mall corridor (outside) is to the RIGHT (high x). Crossing leftwards = ENTRY.
+    tripwire:
+      p1: [0.70, 0.00]
+      p2: [0.70, 1.00]
+      entry_direction: left      # left | right | up | down  (direction of an ENTRY)
+      # Ignore tiny jitters: a track must move at least this far (normalised) across
+      # the line to count, and cannot re-trigger within debounce_seconds.
+      min_cross_disp: 0.03
+      debounce_seconds: 3.0
+
+  - id: CAM_4
+    file: CAM_4.mp4
+    role: backroom               # stockroom — staff-only; presence here => staff signal
+    zone: backroom
+    start_time: "2026-04-10T20:09:45"
+    zones:
+      - name: backroom
+        type: staff_only
+        polygon: [[0.02, 0.02], [0.98, 0.02], [0.98, 0.98], [0.02, 0.98]]
+
+  - id: CAM_5
+    file: CAM_5.mp4
+    role: checkout               # cash counter — the "reached till" funnel stage
+    zone: checkout
+    start_time: "2026-04-10T20:09:48"
+    zones:
+      # Customer side of the counter (right half, facing the till).
+      - name: checkout_queue
+        type: checkout
+        polygon: [[0.45, 0.02], [0.98, 0.02], [0.98, 0.98], [0.45, 0.98]]
+      # Behind the till (left) — whoever stands here is staff (the cashier).
+      - name: till_staff_zone
+        type: staff_only
+        polygon: [[0.02, 0.30], [0.45, 0.30], [0.45, 0.98], [0.02, 0.98]]
+
+# Funnel definition — ordered stages. Counts must be monotonically non-increasing.
+funnel:
+  stages:
+    - key: entered
+      label: Entered store
+      source: entrance
+    - key: engaged
+      label: Browsed a section
+      source: browse
+    - key: reached_till
+      label: Reached the till
+      source: checkout
+    - key: purchased
+      label: Made a purchase
+      source: pos
+
+# Heuristics for classifying a track as staff (excluded from footfall/funnel).
+staff_rules:
+  # A customer almost never dwells longer than this in one browse zone in one visit.
+  max_customer_dwell_seconds: 600
+  # Presence in a staff_only zone (backroom, behind till) => staff.
+  staff_only_zones: [backroom, till_staff_zone]
+
+# Anomaly detection thresholds (see analytics/anomaly.py).
+anomaly:
+  queue_length_warn: 4               # > N people in checkout_queue at once
+  queue_length_crit: 6
+  dwell_no_purchase_minutes: 8       # long browse with no till activity nearby (loss-prevention hint)
+  footfall_spike_zscore: 2.5         # entries/min z-score over rolling baseline
+  idle_entrance_minutes: 20          # store open but zero entries for this long
+  conversion_floor_pct: 5.0          # sustained conversion below this is flagged

@@ -1,0 +1,4 @@
+# Optional: production detection backend. Install to enable backend=yolo.
+#   pip install -r requirements-yolo.txt
+# On first run YOLO downloads yolov8n.pt (~6MB) from the ultralytics release CDN.
+ultralytics==8.3.0
